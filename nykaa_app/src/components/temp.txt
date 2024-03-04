@@ -1,0 +1,305 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart } from '@fortawesome/free-solid-svg-icons';
+
+const ProductCard = ({ product, addToCart }) => {
+  const [quantity, setQuantity] = useState(1);
+
+  const handleAddToCart = () => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      imageUrl: product.imageUrl,
+      price: product.price,
+      quantity: quantity,
+    });
+  };
+
+  return (
+    <div className="card">
+      <img src={product.imageUrl} className="card-img-top" alt="Product" style={{ maxHeight: '34vh', marginBottom: '0' }} />
+      <div className="card-body" style={{ maxHeight: '34vh', marginTop: '0' }}>
+        <h6 className="fw-bolder" style={{ fontSize: '13px', marginBottom: '0' }}>{product.name}</h6>
+        <h6 className="fw-bolder" style={{ fontSize: '10px', marginBottom: '1px' }}>Price: {product.price}</h6>
+        <div className="form-group">
+          <label className="fw-bolder" htmlFor="quantity" style={{ fontSize: '10px', marginBottom: '1px' }}>Quantity:</label>
+          <input
+            type="number"
+            style={{ padding: '1px' }}
+            className="form-control"
+            id="quantity"
+            value={quantity}
+            onChange={(e) => setQuantity(parseInt(e.target.value))}
+          />
+        </div>
+        <button className="btn btn-primary" style={{ fontSize: '10px', backgroundColor: '#ED3AE1' }} onClick={handleAddToCart}>
+          Add to Cart
+        </button>
+        <button className="btn btn-light" style={{ fontSize: '10px', marginLeft: '20px', backgroundColor: 'white' }} >
+          <FontAwesomeIcon icon={faHeart} style={{ color: 'red' }} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const CartDisplay = ({ cartItems }) => {
+  return (
+    <div>
+      <h2>Cart Items</h2>
+      <ul>
+        {cartItems.map(item => (
+          <li key={item.id}>
+            {item.name} - ₹{item.price} - Quantity: {item.quantity}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const Card = () => {
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [cartItems, setCartItems] = useState([]);
+
+  useEffect(() => {
+    axios.get('http://localhost:8080/api/products')
+      .then(response => setProducts(response.data))
+      .catch(error => console.error('Error fetching product data:', error));
+  }, []);
+
+  const handleSearch = () => {
+    axios.get(`http://localhost:8080/api/products/searchByTerm?searchTerm=${searchTerm}`)
+      .then(response => setProducts(response.data))
+      .catch(error => console.error('Error fetching search results:', error));
+  };
+
+  const addToCart = (product) => {
+    console.log('Adding to cart:', product);
+    setCartItems([...cartItems, product]);
+  };
+
+  return (
+    <div className="container">
+      <div className="mb-4">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search products..."
+          className="form-control"
+        />
+        <button onClick={handleSearch} className="btn btn-primary mt-6" style={{ backgroundColor: 'pink' }}>Search</button>
+      </div>
+      <div className="row">
+        {products.map((product) => (
+          <div key={product.id} className="col-md-3 mb-3">
+            <ProductCard product={product} addToCart={addToCart} />
+          </div>
+        ))}
+      </div>
+      <CartDisplay cartItems={cartItems} />
+    </div>
+  );
+};
+
+export default Card;
+
+
+
+
+
+//
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart } from '@fortawesome/free-solid-svg-icons';
+
+const ProductCard = ({ product, addToCart }) => {
+  const [quantity, setQuantity] = useState(1);
+
+  const handleAddToCart = () => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      imageUrl: product.imageUrl,
+      price: product.price,
+      quantity: quantity,
+    });
+  };
+
+  return (
+    <div className="card">
+      <img src={product.imageUrl} className="card-img-top" alt="Product" style={{ maxHeight: '34vh', marginBottom: '0' }} />
+      <div className="card-body" style={{ maxHeight: '34vh', marginTop: '0' }}>
+        <h6 className="fw-bolder" style={{ fontSize: '13px', marginBottom: '0' }}>{product.name}</h6>
+        <h6 className="fw-bolder" style={{ fontSize: '10px', marginBottom: '1px' }}>Price: {product.price}</h6>
+        <div className="form-group">
+          <label className="fw-bolder" htmlFor="quantity" style={{ fontSize: '10px', marginBottom: '1px' }}>Quantity:</label>
+          <input
+            type="number"
+            style={{ padding: '1px' }}
+            className="form-control"
+            id="quantity"
+            value={quantity}
+            onChange={(e) => setQuantity(parseInt(e.target.value))}
+          />
+        </div>
+        <button className="btn btn-primary" style={{ fontSize: '10px', backgroundColor: '#ED3AE1' }} onClick={handleAddToCart}>
+          Add to Cart
+        </button>
+        <button className="btn btn-light" style={{ fontSize: '10px', marginLeft: '20px', backgroundColor: 'white' }} >
+          <FontAwesomeIcon icon={faHeart} style={{ color: 'red' }} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+
+const CartDisplay = ({ cartItems, onQuantityChange, onBuyNowClick }) => {
+
+  return (
+    <div>
+      <h2>Cart Items</h2>
+      <ul className="list-group">
+        {cartItems.map(item => (
+          <li key={item.id} className="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              {item.name} - ₹{item.price} - Quantity:
+              <button
+                className="btn btn-sm btn-outline-primary mx-2"
+                onClick={() => onQuantityChange(item.id, item.quantity - 1)}
+              >
+                -
+              </button>
+              {item.quantity}
+              <button
+                className="btn btn-sm btn-outline-primary mx-2"
+                onClick={() => onQuantityChange(item.id, item.quantity + 1)}
+              >
+                +
+              </button>
+            </div>
+            <span>₹{item.price * item.quantity}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-3">
+        <button className="btn btn-primary" onClick={onBuyNowClick}>
+          Buy Now
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+
+
+const Card = () => {
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [cartItems, setCartItems] = useState([]);
+
+
+  useEffect(() => {
+    axios.get('http://localhost:8080/api/products')
+      .then(response => setProducts(response.data))
+      .catch(error => console.error('Error fetching product data:', error));
+    
+   
+    const storedCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    setCartItems(storedCartItems);
+  }, []);
+
+  const handleSearch = () => {
+    axios.get(`http://localhost:8080/api/products/searchByTerm?searchTerm=${searchTerm}`)
+      .then(response => setProducts(response.data))
+      .catch(error => console.error('Error fetching search results:', error));
+  };
+  const handleQuantityChange = (productId, newQuantity) => {
+   
+    setCartItems(prevCartItems => prevCartItems.map(item => 
+      (item.id === productId ? { ...item, quantity: newQuantity } : item)
+    ));
+  };
+
+  const addToCart = (product) => {
+    const updatedCart = [...cartItems, product];
+    setCartItems(updatedCart);
+    
+    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+    
+  };
+
+  return (
+    <div className="container">
+      <div className="mb-4">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search products..."
+          className="form-control"
+        />
+        <button onClick={handleSearch} className="btn btn-primary mt-6" style={{ backgroundColor: 'pink' }}>Search</button>
+      </div>
+      <div className="row">
+        {products.map((product) => (
+          <div key={product.id} className="col-md-3 mb-3">
+            <ProductCard product={product} addToCart={addToCart} />
+          </div>
+        ))}
+      </div>
+      <CartDisplay cartItems={cartItems} onQuantityChange={handleQuantityChange} />
+    </div>
+  );
+};
+
+export default Card;
+import Carousel from 'react-bootstrap/Carousel';
+
+function DarkVariantExample() {
+  return (
+   
+    <Carousel data-bs-theme="dark" style={{marginBottom:'10px'}}>
+      <Carousel.Item>
+        <img
+          className="d-block w-100"
+          src="https://images-static.nykaa.com/uploads/9d3d605a-e360-4242-9b73-9c3e49e7d289.jpg?tr=w-2400,cm-pad_resize"
+          alt="First slide"
+        />
+        <Carousel.Caption>
+          
+        </Carousel.Caption>
+      </Carousel.Item>
+      <Carousel.Item>
+        <img
+          className="d-block w-100"
+          src="https://images-static.nykaa.com/uploads/251f2229-ffc1-4d1a-b3cc-3979c12eb9f0.jpg?tr=w-2400,cm-pad_resize"
+          alt="Second slide"
+        />
+        <Carousel.Caption>
+          
+        </Carousel.Caption>
+      </Carousel.Item>
+      <Carousel.Item>
+        <img
+          className="d-block w-100"
+          src="https://images-static.nykaa.com/uploads/2d7ecbad-ae79-4499-bf89-5a7a27a98d7b.jpg?tr=w-2400,cm-pad_resize"
+          alt="Third slide"
+        />
+        <Carousel.Caption>
+          
+        </Carousel.Caption>
+      </Carousel.Item>
+    </Carousel>
+  );
+}
+
+export default DarkVariantExample;

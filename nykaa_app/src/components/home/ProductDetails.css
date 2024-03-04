@@ -1,0 +1,100 @@
+/* ProductDetails.css */
+.product-details {
+    /* Add styles for the overall product details container */
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+  }
+  
+  .close-btn {
+    /* Add styles for the close button */
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  
+  .details-container {
+    /* Add styles for the main details container */
+    display: flex;
+  }
+  
+  .product-image img {
+    /* Add styles for the product image */
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .product-info {
+    /* Add styles for the product information section */
+    flex-grow: 1;
+    padding: 0 20px;
+  }
+  
+  .price {
+    /* Add styles for the price */
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .description {
+    /* Add styles for the product description */
+    margin-top: 10px;
+    color: #666;
+  }
+  
+  .add-to-cart {
+    /* Add styles for the add to cart section */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .quantity-input {
+    /* Add styles for the quantity input section */
+    margin-bottom: 10px;
+  }
+  
+  .add-to-cart-btn, .buy-now-btn {
+    /* Add styles for the add to cart and buy now buttons */
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background-color 0.3s;
+  }
+  
+  .add-to-cart-btn:hover, .buy-now-btn:hover {
+    /* Add styles for the hover effect on buttons */
+    background-color: #45a049;
+  }
+  
+  .review-section {
+    /* Add styles for the review section */
+    margin-top: 20px;
+  }
+  
+  textarea {
+    /* Add styles for the review textarea */
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .submit-review-btn {
+    /* Add styles for the submit review button */
+    background-color: #2196F3;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .submit-review-btn:hover {
+    /* Add styles for the hover effect on the submit review button */
+    background-color: #0b7dda;
+  }
+  

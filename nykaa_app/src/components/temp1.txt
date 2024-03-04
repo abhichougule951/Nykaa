@@ -1,0 +1,197 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
+import Navigation from '../Navigation';
+import DarkVariantExample from './Carousels';
+
+const ProductCard = ({ product, addToCart }) => {
+  const [quantity, setQuantity] = useState(1);
+
+  const handleAddToCart = () => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      imageUrl: product.imageUrl,
+      price: product.price,
+      quantity: quantity,
+    });
+  };
+
+  return (
+    <div className="card">
+      <img src={product.imageUrl} className="card-img-top" alt="Product" style={{ maxHeight: '34vh', marginBottom: '0' }} />
+      <div className="card-body" style={{ maxHeight: '34vh', marginTop: '0' }}>
+        <h6 className="fw-bolder" style={{ fontSize: '13px', marginBottom: '0' }}>{product.name}</h6>
+        <h6 className="fw-bolder" style={{ fontSize: '10px', marginBottom: '1px' }}>Price: {product.price}</h6>
+        <div className="form-group">
+          <label className="fw-bolder" htmlFor="quantity" style={{ fontSize: '10px', marginBottom: '1px' }}>Quantity:</label>
+          <input
+            type="number"
+            style={{ padding: '1px' }}
+            className="form-control"
+            id="quantity"
+            value={quantity}
+            onChange={(e) => setQuantity(parseInt(e.target.value))}
+          />
+        </div>
+        <button className="btn btn-primary" style={{ fontSize: '10px', backgroundColor: '#f160c3',fontFamily:'serif' }} onClick={handleAddToCart}>
+          Add to Cart
+        </button>
+        <button className="btn btn-light" style={{ fontSize: '10px', marginLeft: '20px', backgroundColor: 'white' }} >
+          <FontAwesomeIcon icon={faHeart} style={{ color: 'red' }} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+const CartDisplay = ({ cartItems, onQuantityChange, onBuyNowClick }) => {
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [discountApplied, setDiscountApplied] = useState(false);
+
+  const updateTotalPrice = () => {
+    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    setTotalPrice(total);
+  };
+
+  useEffect(() => {
+    if (totalPrice > 5000 && !discountApplied) {
+      showDiscountAlert();
+      setDiscountApplied(true); // Mark the discount as applied
+    }
+  }, [totalPrice, discountApplied]);
+
+  const showDiscountAlert = () => {
+    Swal.fire({
+      title: 'Congratulations!',
+      text: 'You got a ₹200 discount. Total price reduced!',
+      icon: 'success',
+      confirmButtonText: 'Ok',
+    }).then(() => {
+      // Apply the discount to the total price
+      const discountedTotalPrice = totalPrice - 200;
+      setTotalPrice(discountedTotalPrice);
+    });
+  };
+
+  const handleQuantityChange = (productId, newQuantity) => {
+    onQuantityChange(productId, newQuantity);
+    updateTotalPrice();
+  };
+
+  useEffect(() => {
+    updateTotalPrice();
+  }, [cartItems]);
+
+  return (
+    <div>
+      <h2>Cart Items</h2>
+      <ul className="list-group">
+        {cartItems.map((item) => (
+          <li key={item.id} className="list-group-item d-flex justify-content-between align-items-center">
+            <div className="flex items-center">
+              <img src={item.image} alt={item.name} className="h-8 w-8 mr-2 object-cover rounded" />
+              <div>
+                {item.name} - ₹{item.price} - Quantity:
+                <button
+                  className="btn btn-sm btn-outline-primary mx-2"
+                  onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                >
+                  -
+                </button>
+                {item.quantity}
+                <button
+                  className="btn btn-sm btn-outline-primary mx-2"
+                  onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <span>₹{item.price * item.quantity}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-3">
+        <p>Total Price: ₹{totalPrice}</p>
+      </div>
+      <div className="mt-3">
+        <button className="btn btn-primary" onClick={onBuyNowClick}>
+          Buy Now
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+
+
+const Card = () => {
+  const [products, setProducts] = useState([]);
+  
+  const [cartItems, setCartItems] = useState([]);
+
+  const [searchTerm, setSearchTerm] = useState('');
+
+
+  useEffect(() => {
+    axios.get('http://localhost:8080/api/products')
+      .then(response => setProducts(response.data))
+      .catch(error => console.error('Error fetching product data:', error));
+    
+   
+    // const storedCartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    // setCartItems(storedCartItems);
+  }, []);
+
+  const handleSearch = (searchTerm) => {
+    if (searchTerm.trim() !== '') {
+      axios.get(`http://localhost:8080/api/products/searchByTerm?searchTerm=${searchTerm}`)
+        .then(response => {
+          console.log('Search Results:', response.data);
+          setProducts(response.data);
+        })
+        .catch(error => console.error('Error fetching search results:', error));
+    }
+  };
+  const handleQuantityChange = (productId, newQuantity) => {
+   
+    setCartItems(prevCartItems => prevCartItems.map(item => 
+      (item.id === productId ? { ...item, quantity: newQuantity } : item)
+    ));
+  };
+
+  const addToCart = (product) => {
+    const updatedCart = [...cartItems, product];
+    setCartItems(updatedCart);
+    
+    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+    
+  };
+  
+
+  return (
+    <div className="container">
+
+      <Navigation onSearch={handleSearch} />
+      <DarkVariantExample/>
+      <div className="row">
+        {products.map((product) => (
+          <div key={product.id} className="col-md-3 mb-3">
+            <ProductCard product={product} addToCart={addToCart} />
+          </div>
+        ))}
+      </div>
+      <CartDisplay cartItems={cartItems} onQuantityChange={handleQuantityChange}/>
+    </div>
+  );
+};
+
+export default Card;
